@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:my_music_app/data/model/song.dart';
 import 'package:http/http.dart' as http;
 
-abstract interface class DataSource {
+abstract class DataSource {
   Future<List<SongList>?> getSongList();
 }
 

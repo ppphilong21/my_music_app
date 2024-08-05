@@ -9,6 +9,7 @@ class SongList {
     required this.favorite,
     required this.counter,
     required this.replay,
+    required this.image,
   });
 
   factory SongList.fromJson(Map<String, dynamic> map) {
@@ -20,6 +21,7 @@ class SongList {
       source: map['source'] as String,
       duration: map['duration'] as int,
       favorite: map['favorite'] as String,
+      image: map['image'] as String,
       counter: map['counter'] as int,
       replay: map['replay'] as int,
     );
@@ -30,6 +32,7 @@ class SongList {
   String album;
   String artist;
   String source;
+  String image;
   int duration;
   String favorite;
   int counter;

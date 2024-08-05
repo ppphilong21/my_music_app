@@ -1,7 +1,9 @@
 import 'package:my_music_app/data/model/song.dart';
 import 'package:my_music_app/data/source/source.dart';
+import 'package:my_music_app/data/model/song.dart';
+import 'package:my_music_app/data/source/source.dart';
 
-abstract interface class Repository {
+abstract class Repository {
   Future<List<SongList>?> loadData();
 }
 
@@ -25,7 +27,7 @@ class DefaultRepository implements Repository{
         songs.addAll(data);
       }
     });
-    return null;
+    return songs;
   }
 
 }
