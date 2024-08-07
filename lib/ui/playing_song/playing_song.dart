@@ -1,6 +1,8 @@
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:my_music_app/data/model/song.dart';
 
 import 'audio_progress_playing.dart';
@@ -115,9 +117,20 @@ class _PlayingSongPageState extends State<PlayingSongPage>
               padding: const EdgeInsets.only(
                   top: 32, bottom: 16, left: 24, right: 24),
               child: _progressBar(),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(
+                  top: 32, bottom: 16, left: 24, right: 24),
+              child: _mediaButton(),
             )
           ],
         ))));
+  }
+
+  @override
+  void dispose() {
+    _audioPlayerManager.dispose();
+    super.dispose();
   }
 
   StreamBuilder<DurationState> _progressBar() {
@@ -128,7 +141,135 @@ class _PlayingSongPageState extends State<PlayingSongPage>
           final progress = durationState?.progress ?? Duration.zero;
           final buffered = durationState?.buffered ?? Duration.zero;
           final total = durationState?.total ?? Duration.zero;
-          return ProgressBar(progress: progress, total: total);
+          return ProgressBar(
+            progress: progress,
+            total: total,
+            buffered: buffered,
+            onSeek: _audioPlayerManager.player.seek,
+            barHeight: 5.0,
+            barCapShape: BarCapShape.round,
+            baseBarColor: Colors.grey.withOpacity(0.3),
+            progressBarColor: Colors.deepPurple,
+            bufferedBarColor: Colors.grey.withOpacity(0.3),
+            thumbColor: Colors.deepPurple,
+            thumbGlowColor: Colors.green.withOpacity(0.3),
+            thumbRadius: 10,
+          );
         });
+  }
+
+  StreamBuilder<PlayerState> _playButton() {
+    return StreamBuilder(
+        stream: _audioPlayerManager.player.playerStateStream,
+        builder: (context, snapshot) {
+          final playState = snapshot.data;
+          final processingState = playState?.processingState;
+          final playing = playState?.playing;
+          //Nếu đang trong trạng thái lấy dữ liệu hoặc đang tải bài hát
+          if (processingState == ProcessingState.loading ||
+              processingState == ProcessingState.buffering) {
+            return Container(
+              margin: const EdgeInsets.all(8),
+              width: 48,
+              height: 48,
+              child: const CircularProgressIndicator(),
+            );
+          }
+          //Nếu dừng bài hát
+          else if (playing != true) {
+            return MediaButtonControl(
+                function: () {
+                  _audioPlayerManager.player.play();
+                },
+                icon: Icons.play_arrow,
+                color: null,
+                size: 48);
+          }
+          //Đang phát bài hát
+          else if (processingState != ProcessingState.completed) {
+            return MediaButtonControl(
+                function: () {
+                  _audioPlayerManager.player.pause();
+                },
+                icon: Icons.pause,
+                color: null,
+                size: 48);
+          }
+          //Phát lại
+          else {
+            return MediaButtonControl(
+                function: () {
+                  _audioPlayerManager.player.seek(Duration.zero);
+                },
+                icon: Icons.replay,
+                color: null,
+                size: 48);
+          }
+        });
+  }
+
+  Widget _mediaButton() {
+    return SizedBox(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          const MediaButtonControl(
+              function: null,
+              icon: Icons.shuffle,
+              color: Colors.deepPurple,
+              size: 24),
+          const MediaButtonControl(
+              function: null,
+              icon: Icons.skip_previous,
+              color: Colors.grey,
+              size: 36),
+          _playButton(),
+          // const MediaButtonControl(
+          //     function: null,
+          //     icon: Icons.play_arrow_rounded,
+          //     color: Colors.grey,
+          //     size: 48),
+          const MediaButtonControl(
+              function: null,
+              icon: Icons.skip_next,
+              color: Colors.grey,
+              size: 36),
+          const MediaButtonControl(
+              function: null,
+              icon: Icons.repeat,
+              color: Colors.deepPurple,
+              size: 24),
+        ],
+      ),
+    );
+  }
+}
+
+class MediaButtonControl extends StatefulWidget {
+  const MediaButtonControl(
+      {super.key,
+      required this.function,
+      required this.icon,
+      required this.color,
+      required this.size});
+
+  final void Function()? function;
+  final IconData icon;
+  final double? size;
+  final Color? color;
+
+  @override
+  State<MediaButtonControl> createState() => _MediaButtonControlState();
+}
+
+class _MediaButtonControlState extends State<MediaButtonControl> {
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: widget.function,
+      icon: Icon(widget.icon),
+      color: widget.color ?? Theme.of(context).colorScheme.primary,
+      iconSize: widget.size,
+    );
   }
 }

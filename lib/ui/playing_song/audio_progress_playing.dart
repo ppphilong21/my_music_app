@@ -18,6 +18,10 @@ class AudioProgressPlaying {
             total: playBackEvent.duration));
     player.setUrl(songUrl);
   }
+
+  Future<void> dispose(){
+    return player.dispose();
+  }
 }
 
 class DurationState {
