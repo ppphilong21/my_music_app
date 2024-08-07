@@ -18,6 +18,15 @@ class AudioProgressPlaying {
             total: playBackEvent.duration));
     player.setUrl(songUrl);
   }
+
+  Future<void> dispose(){
+    return player.dispose();
+  }
+
+  void updateSongUrl(String url){
+    songUrl = url;
+    init();
+  }
 }
 
 class DurationState {
