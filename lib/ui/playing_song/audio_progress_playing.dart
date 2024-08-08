@@ -22,6 +22,11 @@ class AudioProgressPlaying {
   Future<void> dispose(){
     return player.dispose();
   }
+
+  void updateSongUrl(String url){
+    songUrl = url;
+    init();
+  }
 }
 
 class DurationState {
